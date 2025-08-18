@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Bus Reservation System</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 2em; }
+        .container { max-width: 600px; margin: auto; }
+        h1 { text-align: center; }
+        .bus-list, .booking-list { margin-bottom: 2em; }
+        label, input, select { display: block; margin: 0.5em 0; }
+        button { margin-top: 1em; }
+        .success { color: green; }
+        .error { color: red; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Bus Reservation System</h1>
+        <div class="bus-list">
+            <h2>Available Buses</h2>
+            <ul id="buses"></ul>
+        </div>
+        <div class="booking-form">
+            <h2>Book a Ticket</h2>
+            <form id="bookingForm">
+                <label for="name">Passenger Name:</label>
+                <input type="text" id="name" required>
+                <label for="busNo">Bus No:</label>
+                <select id="busNo"></select>
+                <label for="date">Date:</label>
+                <input type="date" id="date" required>
+                <button type="submit">Book</button>
+            </form>
+            <div id="bookingMsg"></div>
+        </div>
+        <div class="booking-list">
+            <h2>All Bookings</h2>
+            <ul id="bookings"></ul>
+        </div>
+    </div>
+    <script>
+        // Mock data
+        const buses = [
+            { busNo: 1, ac: true, capacity: 2 },
+            { busNo: 2, ac: false, capacity: 50 },
+            { busNo: 3, ac: true, capacity: 48 }
+        ];
+        const bookings = [];
+
+        // Display buses
+        const busList = document.getElementById('buses');
+        const busNoSelect = document.getElementById('busNo');
+        buses.forEach(bus => {
+            const li = document.createElement('li');
+            li.textContent = `Bus No: ${bus.busNo} | Type: ${bus.ac ? 'AC' : 'Non-AC'} | Capacity: ${bus.capacity}`;
+            busList.appendChild(li);
+
+            const option = document.createElement('option');
+            option.value = bus.busNo;
+            option.textContent = `Bus ${bus.busNo} (${bus.ac ? 'AC' : 'Non-AC'})`;
+            busNoSelect.appendChild(option);
+        });
+
+        // Handle booking
+        document.getElementById('bookingForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const name = document.getElementById('name').value.trim();
+            const busNo = parseInt(document.getElementById('busNo').value);
+            const date = document.getElementById('date').value;
+
+            if (!name || !date) {
+                showMsg('Please fill all fields.', 'error');
+                return;
+            }
+
+            // Check capacity
+            const bookedCount = bookings.filter(b => b.busNo === busNo && b.date === date).length;
+            const bus = buses.find(b => b.busNo === busNo);
+            if (bookedCount >= bus.capacity) {
+                showMsg('Sorry. Bus is full for selected date.', 'error');
+                return;
+            }
+
+            bookings.push({ name, busNo, date });
+            showMsg('Your booking is confirmed!', 'success');
+            updateBookings();
+            this.reset();
+        });
+
+        function showMsg(msg, type) {
+            const div = document.getElementById('bookingMsg');
+            div.textContent = msg;
+            div.className = type;
+            setTimeout(() => { div.textContent = ''; }, 3000);
+        }
+
+        // Display bookings
+        function updateBookings() {
+            const bookingList = document.getElementById('bookings');
+            bookingList.innerHTML = '';
+            bookings.forEach(b => {
+                const li = document.createElement('li');
+                li.textContent = `Name: ${b.name} | Bus No: ${b.busNo} | Date: ${b.date}`;
+                bookingList.appendChild(li);
+            });
+        }
+    </script>
+</body>
+</html>
